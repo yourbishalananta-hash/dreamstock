@@ -480,6 +480,7 @@
 
 .summary-card.row-clickable { cursor: pointer; transition: transform var(--dur-fast), box-shadow var(--dur-fast); }
 .summary-card.row-clickable:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
 /* ============================================
    AUTHENTICATION STYLES
    ============================================ */
@@ -713,11 +714,6 @@
 
 /* User Profile */
 .user-profile {
-  background: transparent;
-  border: none;
-  font-family: inherit;
-  color: inherit;
-}
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -725,6 +721,10 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  color: inherit;
 }
 
 .user-profile:hover {
@@ -845,4 +845,3 @@
   border: none;
   border-top: 1px solid var(--border-color);
 }
-
