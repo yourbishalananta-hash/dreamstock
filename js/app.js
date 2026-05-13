@@ -21,12 +21,12 @@ async initialize() {
     this.initializeServices();
     this.setupEventListeners();
     await this.loadInitialData();
-    
+
     // Initialize authentication
-    this.initAuth();
-    
+    await this.initAuth();
+
     // Load user data if logged in
-    if (authManager.isLoggedIn()) {
+    if (typeof authManager !== 'undefined' && authManager.isLoggedIn && authManager.isLoggedIn()) {
       this.loadUserData();
     }
 
@@ -55,6 +55,22 @@ async initialize() {
   }
 }
 
+  async initAuth() {
+    console.log("🔐 Initializing Authentication...");
+    // For now, we simulate a successful login
+    const user = localStorage.getItem('dreamstock_user');
+    if (!user) {
+      console.warn("⚠️ No user logged in, proceeding as guest.");
+      return { authenticated: false, role: 'guest' };
+    }
+    try {
+      return { authenticated: true, user: JSON.parse(user) };
+    } catch (e) {
+      console.warn("⚠️ Corrupt user record in localStorage, clearing.");
+      localStorage.removeItem('dreamstock_user');
+      return { authenticated: false, role: 'guest' };
+    }
+  }
 
   initializeServices() {
     if (typeof CONFIG !== 'undefined' && CONFIG.features?.realTimeUpdates && typeof webSocketService !== 'undefined') {

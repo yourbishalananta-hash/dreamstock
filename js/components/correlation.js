@@ -140,4 +140,69 @@ class CorrelationMatrixComponent extends BaseComponent {
     getCorrelationColor(value) {
         if (value > 0.7) return 'strong-positive';
         if (value > 0.3) return 'moderate-positive';
-        if (value > -0.3)
+        if (value > -0.3) return 'neutral';
+        if (value > -0.7) return 'moderate-negative';
+        return 'strong-negative';
+    }
+
+    attachEventListeners() {
+        const analyzeBtn = this.container.querySelector('#add-symbols');
+        if (analyzeBtn) {
+            analyzeBtn.addEventListener('click', () => this.analyzeCorrelation());
+        }
+
+        const symbolsInput = this.container.querySelector('#corr-symbols');
+        if (symbolsInput) {
+            symbolsInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.analyzeCorrelation();
+                }
+            });
+        }
+
+        // Re-run analysis when the period or method changes (only if data exists)
+        ['#corr-period', '#corr-method'].forEach(sel => {
+            const el = this.container.querySelector(sel);
+            if (el) el.addEventListener('change', () => {
+                if (this.symbols.length >= 2) this.analyzeCorrelation();
+            });
+        });
+    }
+
+    generateInsights() {
+        const insightsDiv = document.getElementById('correlation-insights');
+        if (!insightsDiv || !this.correlationData.length) return;
+
+        // Collect unique off-diagonal pairs
+        const pairs = [];
+        for (let i = 0; i < this.symbols.length; i++) {
+            for (let j = i + 1; j < this.symbols.length; j++) {
+                pairs.push({
+                    a: this.symbols[i],
+                    b: this.symbols[j],
+                    value: this.correlationData[i][j]
+                });
+            }
+        }
+
+        if (!pairs.length) {
+            insightsDiv.innerHTML = '';
+            return;
+        }
+
+        const sorted = [...pairs].sort((p, q) => q.value - p.value);
+        const strongest = sorted[0];
+        const weakest = sorted[sorted.length - 1];
+        const avg = pairs.reduce((s, p) => s + p.value, 0) / pairs.length;
+
+        insightsDiv.innerHTML = `
+            <h4>Insights</h4>
+            <ul>
+                <li><strong>Strongest positive:</strong> ${strongest.a} ↔ ${strongest.b} (${strongest.value.toFixed(2)})</li>
+                <li><strong>Strongest negative / weakest:</strong> ${weakest.a} ↔ ${weakest.b} (${weakest.value.toFixed(2)})</li>
+                <li><strong>Average correlation:</strong> ${avg.toFixed(2)}</li>
+            </ul>
+        `;
+    }
+}
