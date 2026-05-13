@@ -6,6 +6,7 @@ Sentry.init({
   // For example, automatic IP address collection on events
   sendDefaultPii: true
 });
+myUndefinedFunction();   // this function does not exist
 // ============================================
 // DREAM SHARE - MAIN APPLICATION
 // ============================================
@@ -24,7 +25,6 @@ async initialize() {
   if (this.initialized) return;
   console.log('🚀 Initializing Dream Stock...');
   this.showLoading(true);
-myUndefinedFunction();
   try {
     this.initializeServices();
     this.setupEventListeners();
