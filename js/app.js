@@ -24,7 +24,7 @@ async initialize() {
   if (this.initialized) return;
   console.log('🚀 Initializing Dream Stock...');
   this.showLoading(true);
-
+myUndefinedFunction();
   try {
     this.initializeServices();
     this.setupEventListeners();
