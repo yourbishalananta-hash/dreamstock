@@ -1,6 +1,11 @@
 import * as Sentry from "@sentry/browser";
 
-Sentry.init({ dsn: "your-dsn-here" });
+Sentry.init({
+  dsn: "https://dabc1f06d1123664aa0354753f424030@o4511383434952704.ingest.de.sentry.io/4511383445635152",
+  // Setting this option to true will send default PII data to Sentry.
+  // For example, automatic IP address collection on events
+  sendDefaultPii: true
+});
 // ============================================
 // DREAM SHARE - MAIN APPLICATION
 // ============================================
