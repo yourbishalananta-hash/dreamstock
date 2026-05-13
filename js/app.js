@@ -1,9 +1,3 @@
-import * as Sentry from "@sentry/browser";
-
-Sentry.init({
-  dsn: "https://dabc1f06d1123664aa0354753f424030@o4511383434952704.ingest.de.sentry.io/4511383445635152",
-  sendDefaultPii: true
-});
 // ============================================
 // DREAM SHARE - MAIN APPLICATION
 // ============================================
