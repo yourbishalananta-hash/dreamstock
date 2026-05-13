@@ -713,6 +713,11 @@
 
 /* User Profile */
 .user-profile {
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  color: inherit;
+}
   display: flex;
   align-items: center;
   gap: 0.5rem;
