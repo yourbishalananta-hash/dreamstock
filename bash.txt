@@ -1,0 +1,28 @@
+dreamstock/
+├── index.html              
+├── README.md
+├── css/
+│   ├── themes.css
+│   └── components.css
+└── js/
+    ├── config.js
+    ├── app.js             
+    ├── core/
+    │   ├── eventBus.js
+    │   ├── stateManager.js  
+    │   ├── baseComponent.js 
+    │   └── autocomplete.js  
+    ├── utils/
+    │   ├── formatters.js
+    │   └── indicators.js
+    ├── api/
+    │   ├── apiService.js
+    │   └── websocket.js
+    └── components/
+        ├── charts.js        
+        ├── watchlist.js     
+        ├── portfolio.js     
+        ├── marketDepth.js  
+        ├── screener.js      
+        ├── news.js          
+        └── alerts.js        

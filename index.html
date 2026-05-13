@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MarketPulse Pro — advanced real-time trading platform with charts, watchlists, portfolio tracking, screeners, and market analytics.">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="color-scheme" content="light">
+
+  <title>MarketPulse Pro — Advanced Trading Platform</title>
+
+  <!-- Preconnect to performance-critical origins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://unpkg.com">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <!-- Charting libraries (deferred so they don't block render) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script defer src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+
+  <!-- No-JS fallback -->
+  <noscript>
+    <div style="padding: 2rem; text-align: center; font-family: system-ui, sans-serif;">
+      <h1>JavaScript Required</h1>
+      <p>MarketPulse Pro needs JavaScript enabled to display live market data.</p>
+    </div>
+  </noscript>
+
+  <!-- Loading Screen -->
+  <div class="loading-overlay" id="loadingOverlay" role="status" aria-live="polite">
+    <div class="loading-content">
+      <div class="loading-logo">
+        <i class="fas fa-chart-line" aria-hidden="true"></i>
+        <h1>Market<span>Pulse Pro</span></h1>
+      </div>
+      <div class="loading-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p id="loadingMessage">Initializing platform&hellip;</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Platform -->
+  <div class="platform" id="mainPlatform" style="display: none;">
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav glass" aria-label="Primary">
+      <div class="nav-left">
+        <a href="#" class="logo" aria-label="MarketPulse Pro home">
+          <i class="fas fa-chart-line" aria-hidden="true"></i>
+          <h1>Market<span>Pulse Pro</span></h1>
+        </a>
+        <div class="market-status" id="marketStatus" aria-live="polite">
+          <span class="status-indicator" aria-hidden="true"></span>
+          <span class="status-text">Market Closed</span>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <div class="global-search-wrapper">
+          <div class="search-container">
+            <i class="fas fa-search search-icon" aria-hidden="true"></i>
+            <input
+              type="search"
+              id="globalSearch"
+              placeholder="Search stocks, indices, ETFs…"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="Search stocks, indices, and ETFs"
+            >
+            <button class="search-clear" id="searchClear" type="button" aria-label="Clear search" style="display: none;">
+              <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="search-results" id="searchResults" role="listbox" aria-label="Search results"></div>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <div class="nav-actions">
+          <button class="nav-btn" id="btnWatchlist" type="button" title="Watchlist" aria-label="Open watchlist">
+            <i class="fas fa-star" aria-hidden="true"></i>
+            <span class="badge" id="watchlistCount" aria-label="Watchlist items">0</span>
+          </button>
+          <button class="nav-btn" id="btnAlerts" type="button" title="Alerts" aria-label="Open alerts">
+            <i class="fas fa-bell" aria-hidden="true"></i>
+            <span class="badge" id="alertsCount" aria-label="Active alerts">0</span>
+          </button>
+          <button class="nav-btn" id="btnPortfolio" type="button" title="Portfolio" aria-label="Open portfolio">
+            <i class="fas fa-briefcase" aria-hidden="true"></i>
+          </button>
+          <button class="nav-btn" id="btnSettings" type="button" title="Settings" aria-label="Open settings">
+            <i class="fas fa-cog" aria-hidden="true"></i>
+          </button>
+          <div class="user-profile" aria-label="Signed in as Trader">
+            <div class="avatar" aria-hidden="true">U</div>
+            <span class="username">Trader</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="main-container">
+
+      <!-- Sidebar -->
+      <aside class="sidebar glass" id="sidebar" aria-label="Main navigation">
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Markets</h3>
+          <ul class="sidebar-menu" role="list">
+            <li class="menu-item active" data-view="dashboard" role="button" tabindex="0">
+              <i class="fas fa-th-large" aria-hidden="true"></i> Dashboard
+            </li>
+            <li class="menu-item" data-view="watchlist" role="button" tabindex="0">
+              <i class="fas fa-star" aria-hidden="true"></i> Watchlist
+              <span class="menu-badge" id="sidebarWatchlistCount">0</span>
+            </li>
+            <li class="menu-item" data-view="portfolio" role="button" tabindex="0">
+              <i class="fas fa-briefcase" aria-hidden="true"></i> Portfolio
+            </li>
+            <li class="menu-item" data-view="orders" role="button" tabindex="0">
+              <i class="fas fa-exchange-alt" aria-hidden="true"></i> Orders
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Analysis</h3>
+          <ul class="sidebar-menu" role="list">
+            <li class="menu-item" data-view="charts" role="button" tabindex="0">
+              <i class="fas fa-chart-line" aria-hidden="true"></i> Charts
+            </li>
+            <li class="menu-item" data-view="screener" role="button" tabindex="0">
+              <i class="fas fa-filter" aria-hidden="true"></i> Screener
+            </li>
+            <li class="menu-item" data-view="technical" role="button" tabindex="0">
+              <i class="fas fa-chart-bar" aria-hidden="true"></i> Technical
+            </li>
+            <li class="menu-item" data-view="fundamental" role="button" tabindex="0">
+              <i class="fas fa-file-invoice" aria-hidden="true"></i> Fundamental
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Advanced Tools</h3>
+          <ul class="sidebar-menu" role="list">
+            <li class="menu-item" data-view="options" role="button" tabindex="0">
+              <i class="fas fa-chart-pie" aria-hidden="true"></i> Options Chain
+            </li>
+            <li class="menu-item" data-view="backtesting" role="button" tabindex="0">
+              <i class="fas fa-flask" aria-hidden="true"></i> Backtesting
+            </li>
+            <li class="menu-item" data-view="correlation" role="button" tabindex="0">
+              <i class="fas fa-project-diagram" aria-hidden="true"></i> Correlation Matrix
+            </li>
+            <li class="menu-item" data-view="sentiment" role="button" tabindex="0">
+              <i class="fas fa-comments" aria-hidden="true"></i> Sentiment Analysis
+            </li>
+            <li class="menu-item" data-view="risk-management" role="button" tabindex="0">
+              <i class="fas fa-shield-alt" aria-hidden="true"></i> Risk Management
+            </li>
+            <li class="menu-item" data-view="ai-predictor" role="button" tabindex="0">
+              <i class="fas fa-robot" aria-hidden="true"></i> AI Predictor
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Market Data</h3>
+          <ul class="sidebar-menu" role="list">
+            <li class="menu-item" data-view="economic-calendar" role="button" tabindex="0">
+              <i class="fas fa-calendar-alt" aria-hidden="true"></i> Economic Calendar
+            </li>
+            <li class="menu-item" data-view="dividends" role="button" tabindex="0">
+              <i class="fas fa-hand-holding-usd" aria-hidden="true"></i> Dividends
+            </li>
+            <li class="menu-item" data-view="heatmap" role="button" tabindex="0">
+              <i class="fas fa-th" aria-hidden="true"></i> Heat Map
+            </li>
+            <li class="menu-item" data-view="compare" role="button" tabindex="0">
+              <i class="fas fa-balance-scale" aria-hidden="true"></i> Compare
+            </li>
+            <li class="menu-item" data-view="alerts" role="button" tabindex="0">
+              <i class="fas fa-bell" aria-hidden="true"></i> Alerts
+              <span class="menu-badge" id="sidebarAlertsCount">0</span>
+            </li>
+            <li class="menu-item" data-view="news" role="button" tabindex="0">
+              <i class="fas fa-newspaper" aria-hidden="true"></i> News
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Indices</h3>
+          <div class="indices-list" id="indicesList">
+            <div class="index-item">
+              <span class="index-name">Loading…</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content Area -->
+      <main class="content-area" id="contentArea" tabindex="-1">
+        <!-- Views are mounted here by app.js -->
+      </main>
+    </div>
+
+    <!-- Bottom Status Bar -->
+    <footer class="status-bar glass" aria-label="Connection status">
+      <div class="status-left">
+        <span id="connectionStatus">
+          <i class="fas fa-circle disconnected" aria-hidden="true"></i> Disconnected
+        </span>
+        <span id="lastUpdated">Last updated: —</span>
+      </div>
+      <div class="status-center">
+        <span id="marketTime">Market opens in: —</span>
+      </div>
+      <div class="status-right">
+        <span>Data: NSE / BSE</span>
+        <span>Delay: Real-time</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal & Toast roots -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-container" id="modalContainer"></div>
+  </div>
+  <div class="toast-container" id="toastContainer" role="region" aria-live="polite" aria-label="Notifications"></div>
+
+  <!-- Hidden containers for dynamic content (will be shown/hidden by router) -->
+  <div class="view-container" id="options-chain-container" style="display: none;"></div>
+  <div class="view-container" id="backtesting-container" style="display: none;"></div>
+  <div class="view-container" id="economic-calendar-container" style="display: none;"></div>
+  <div class="view-container" id="correlation-matrix-container" style="display: none;"></div>
+  <div class="view-container" id="sentiment-container" style="display: none;"></div>
+  <div class="view-container" id="dividend-container" style="display: none;"></div>
+  <div class="view-container" id="heatmap-container" style="display: none;"></div>
+  <div class="view-container" id="risk-manager-container" style="display: none;"></div>
+  <div class="view-container" id="ai-predictor-container" style="display: none;"></div>
+
+  <!--
+    JavaScript load order (dependencies first):
+
+       1. config              → CONFIG global
+       2. core/eventBus       → EventBus + eventBus singleton
+       3. core/stateManager   → uses CONFIG; stateManager singleton
+       4. core/baseComponent  → base class for all components
+       5. core/autocomplete   → reusable autocomplete control
+       6. utils/formatters    → Formatters
+       7. utils/indicators    → TechnicalIndicators
+       8. api/apiService      → apiService singleton
+       9. api/websocket       → uses CONFIG / eventBus / stateManager
+      10. components/*        → feature components
+      11. app.js              → entry point
+  -->
+
+  <!-- Config -->
+  <script src="js/config.js"></script>
+
+  <!-- Core -->
+  <script src="js/core/eventBus.js"></script>
+  <script src="js/core/stateManager.js"></script>
+  <script src="js/core/baseComponent.js"></script>
+  <script src="js/core/autocomplete.js"></script>
+
+  <!-- Utils -->
+  <script src="js/utils/formatters.js"></script>
+  <script src="js/utils/indicators.js"></script>
+
+  <!-- API -->
+  <script src="js/api/apiService.js"></script>
+  <script src="js/api/websocket.js"></script>
+
+  <!-- Components -->
+  <script src="js/components/charts.js"></script>
+  <script src="js/components/watchlist.js"></script>
+  <script src="js/components/portfolio.js"></script>
+  <script src="js/components/marketdepth.js"></script>
+  <script src="js/components/screener.js"></script>
+  <script src="js/components/news.js"></script>
+  <script src="js/components/alerts.js"></script>
+
+  <!-- New Advanced Components -->
+  <script src="js/components/optionschain.js"></script>
+  <script src="js/components/backtesting.js"></script>
+  <script src="js/components/economicCalendar.js"></script>
+  <script src="js/components/correlation.js"></script>
+  <script src="js/components/sentiment.js"></script>
+  <script src="js/components/dividends.js"></script>
+  <script src="js/components/heatmap.js"></script>
+  <script src="js/components/riskManager.js"></script>
+  <script src="js/components/aiPredictor.js"></script>
+
+  <!-- App entry point -->
+  <script src="js/app.js"></script>
+</body>
+</html>
