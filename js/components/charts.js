@@ -61,6 +61,9 @@ class ChartsComponent {
                 <i class="fas fa-${t === 'candle' ? 'chart-bar' : (t === 'area' ? 'chart-area' : 'chart-line')}"></i>
                 ${t[0].toUpperCase() + t.slice(1)}
               </button>`).join('')}
+            <button class="type-btn reset-zoom-btn" id="reset-zoom-btn" title="Reset zoom" style="display:none;">
+              <i class="fas fa-search-minus"></i> Reset
+            </button>
           </div>
         </div>
 
@@ -176,6 +179,17 @@ class ChartsComponent {
         }
       });
     }
+
+    // Reset zoom (only useful if chartjs-plugin-zoom is loaded)
+    const resetBtn = document.getElementById('reset-zoom-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (this.charts.price && typeof this.charts.price.resetZoom === 'function') {
+          this.charts.price.resetZoom();
+          resetBtn.style.display = 'none';
+        }
+      });
+    }
   }
 
   // ----------------------------------------------------------
@@ -203,6 +217,8 @@ class ChartsComponent {
 
   _renderAll(data) {
     this._destroyAll();
+    const resetBtn = document.getElementById('reset-zoom-btn');
+    if (resetBtn) resetBtn.style.display = 'none';
     this.renderPriceChart(data);
     if (this.panes.volume) this.renderVolumeChart(data);
     if (this.panes.rsi)    this.renderRSIChart(data);
@@ -344,10 +360,11 @@ class ChartsComponent {
                         data[0] && data[0].open != null && data[0].high != null && data[0].low != null;
 
     if (this.chartType === 'candle' && candleAvail) {
+      // Use index as x to stay aligned with the category labels used by other panes.
       datasets.push({
         label: this.currentSymbol,
         type: 'candlestick',
-        data: data.map(d => ({ x: d.timestamp, o: d.open, h: d.high, l: d.low, c: d.close })),
+        data: data.map((d, i) => ({ x: i, o: d.open, h: d.high, l: d.low, c: d.close })),
         color: { up: 'rgb(22, 163, 74)', down: 'rgb(220, 38, 38)', unchanged: '#999' },
         borderColor: { up: 'rgb(22, 163, 74)', down: 'rgb(220, 38, 38)', unchanged: '#999' },
       });
@@ -436,6 +453,19 @@ class ChartsComponent {
                 return `${c.dataset.label}: ₹${Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
               }
             }
+          },
+          // Config for chartjs-plugin-zoom (no-op if plugin isn't loaded)
+          zoom: {
+            limits: { x: { minRange: 5 } },
+            pan: { enabled: true, mode: 'x', modifierKey: null },
+            zoom: {
+              wheel: { enabled: true, speed: 0.08 },
+              pinch: { enabled: true },
+              drag: { enabled: false },
+              mode: 'x',
+              onZoom: ({ chart }) => this._onZoomChange(chart),
+              onPan:  ({ chart }) => this._onZoomChange(chart),
+            },
           },
         },
         scales: {
@@ -626,6 +656,29 @@ class ChartsComponent {
   }
 
   // ----------------------------------------------------------
+  // ZOOM SYNC — keep all panes aligned when the price pane zooms/pans
+  // ----------------------------------------------------------
+  _onZoomChange(sourceChart) {
+    const resetBtn = document.getElementById('reset-zoom-btn');
+    if (resetBtn) resetBtn.style.display = 'inline-block';
+
+    // Mirror the visible x-range on every sub-pane so they stay aligned
+    const xScale = sourceChart.scales.x;
+    if (!xScale) return;
+    const min = xScale.min;
+    const max = xScale.max;
+
+    ['volume', 'rsi', 'macd'].forEach(key => {
+      const c = this.charts[key];
+      if (!c) return;
+      if (!c.options.scales || !c.options.scales.x) return;
+      c.options.scales.x.min = min;
+      c.options.scales.x.max = max;
+      c.update('none');
+    });
+  }
+
+  // ----------------------------------------------------------
   // HELPERS
   // ----------------------------------------------------------
   _labels(data) {
@@ -677,6 +730,8 @@ class ChartsComponent {
       .range-btn:hover, .type-btn:hover { background: var(--bg-hover, #e5e7eb); }
       .range-btn.active, .type-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
       .type-btn i { margin-right: 4px; font-size: 11px; }
+      .reset-zoom-btn { background: #f97316 !important; color: white !important; border-color: #f97316 !important; }
+      .reset-zoom-btn:hover { background: #ea580c !important; }
 
       .indicator-bar {
         display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
