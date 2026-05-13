@@ -1,3 +1,6 @@
+import * as Sentry from "@sentry/browser";
+
+Sentry.init({ dsn: "your-dsn-here" });
 // ============================================
 // DREAM SHARE - MAIN APPLICATION
 // ============================================
