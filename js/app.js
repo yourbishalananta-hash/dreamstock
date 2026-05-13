@@ -21,7 +21,14 @@ async initialize() {
     this.initializeServices();
     this.setupEventListeners();
     await this.loadInitialData();
-
+this.safeBind('userProfile', () => {
+  if (typeof authManager !== 'undefined' && authManager.isLoggedIn?.()) {
+    // already logged in — open user menu, or log out
+    if (typeof authModal !== 'undefined') authModal.show('login'); // placeholder
+  } else {
+    if (typeof authModal !== 'undefined') authModal.show('login');
+  }
+});
     // Initialize authentication
     await this.initAuth();
 
