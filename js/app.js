@@ -12,40 +12,49 @@ class DreamShareApp {
     this.detailViewState = null; // {primarySymbol, comparisonSymbol?, detail, compareDetail?}
   }
 
-  async initialize() {
-    if (this.initialized) return;
-    console.log('🚀 Initializing Dream Share...');
-    this.showLoading(true);
+async initialize() {
+  if (this.initialized) return;
+  console.log('🚀 Initializing Dream Stock...');
+  this.showLoading(true);
 
-    try {
-      this.initializeServices();
-      this.setupEventListeners();
-      await this.loadInitialData();
-
-      this.showLoading(false);
-      const main = document.getElementById('mainPlatform');
-      if (main) main.style.display = 'grid';
-
-      const initialView = stateManager.get('activeView') || 'dashboard';
-      await this.loadView(initialView);
-
-      this.updateMarketStatus();
-      this.updateBadges();
-      this.updateIndicesPanel();
-      this.startPeriodicUpdates();
-      this.attachGlobalSearchAutocomplete();
-
-      this.initialized = true;
-      console.log('✅ Dream Share initialized successfully');
-    } catch (error) {
-      console.error('❌ Initialization failed:', error);
-      this.showLoading(false);
-      const main = document.getElementById('mainPlatform');
-      if (main) main.style.display = 'grid';
-      this.showToast('Initialization had errors.', 'error');
-      try { await this.loadView('dashboard'); } catch (_) {}
+  try {
+    this.initializeServices();
+    this.setupEventListeners();
+    await this.loadInitialData();
+    
+    // Initialize authentication
+    this.initAuth();
+    
+    // Load user data if logged in
+    if (authManager.isLoggedIn()) {
+      this.loadUserData();
     }
+
+    this.showLoading(false);
+    const main = document.getElementById('mainPlatform');
+    if (main) main.style.display = 'grid';
+
+    const initialView = stateManager.get('activeView') || 'dashboard';
+    await this.loadView(initialView);
+
+    this.updateMarketStatus();
+    this.updateBadges();
+    this.updateIndicesPanel();
+    this.startPeriodicUpdates();
+    this.attachGlobalSearchAutocomplete();
+
+    this.initialized = true;
+    console.log('✅ Dream Stock initialized successfully');
+  } catch (error) {
+    console.error('❌ Initialization failed:', error);
+    this.showLoading(false);
+    const main = document.getElementById('mainPlatform');
+    if (main) main.style.display = 'grid';
+    this.showToast('Initialization had errors.', 'error');
+    try { await this.loadView('dashboard'); } catch (_) {}
   }
+}
+
 
   initializeServices() {
     if (typeof CONFIG !== 'undefined' && CONFIG.features?.realTimeUpdates && typeof webSocketService !== 'undefined') {
